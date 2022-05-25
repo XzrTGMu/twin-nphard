@@ -269,6 +269,11 @@ see <https://github.com/zhongyuanzhao/gcn-dql> for more information.
 
 Change line 3 in `bash/wireless_gcn_delay_test.sh` to `setval='DelayLHRL'`, then run `bash bash/wireless_gcn_delay_test.sh`.
 
+## Plot results
+
+- Figures 1-4 `plot_test_results.ipynb`,
+- Figure 5 `plot_delay_oriented_twin.py`,
+- Figure 6 `plot_training.ipynb`.
 
 
 ## 6. Core References

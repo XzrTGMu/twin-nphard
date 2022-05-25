@@ -282,8 +282,9 @@ Change line 3 in `bash/wireless_gcn_delay_test.sh` to `setval='DelayLHRL'`, then
 ### 6.2 Algorithms
 
 1. Maximum Weighted Independent Set (MWIS): local greedy solver [[Joo 2012](https://ieeexplore.ieee.org/document/5714691)], code [[Zhao 2021](https://github.com/zhongyuanzhao/distgcn/blob/main/heuristics.py)]
-2. Minimum Weighted Dominating Set (MWDS) 
-3. Node Weighted Steiner Tree (NWST) 
-4. Minimum Weighted Connected Dominating Set (MWCDS) 
-5. Zeroth order optimization (ZOO) 
+2. Minimum Weighted Dominating Set (MWDS) [Greedy heuristic in [Jovanovic 2010](http://mail.ipb.ac.rs/~rakaj/home/Catania.pdf)]
+3. Node Weighted Steiner Tree (NWST) [SPH: [Takahashi 1990](https://cir.nii.ac.jp/crid/1572824500472548736), K-SPH [Bauer 1996](https://ieeexplore.ieee.org/abstract/document/490746/)]
+4. Minimum Weighted Connected Dominating Set (MWCDS) [[Sun 2019](https://www.mdpi.com/450560)]
+5. Zeroth order optimization (ZOO) [[Liu 2020](https://ieeexplore.ieee.org/abstract/document/9186148/)]
+
 

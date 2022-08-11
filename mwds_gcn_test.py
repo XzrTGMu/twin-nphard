@@ -90,7 +90,8 @@ baseline = mwds_vvv
 
 best_IS_vec = []
 loss_vec = []
-results = pd.DataFrame([], columns=["type", "size", "k", "p", "mwds", "mwcds", "gcn", "greedy", "ratio"])
+results = pd.DataFrame([], columns=["type", "size", "k", "p", "mwds", "mwcds", "gcn", "greedy", "ratio",
+                                    "t0","t1","t2","t3"])
 csvname = "./output/{}_{}_test_foo.csv".format(model_origin.split('/')[-1], test_datapath.split('/')[-1])
 
 epislon_reset = [5, 10, 15, 20]
@@ -106,7 +107,6 @@ for id in range(2000):
     losses_crt = []
     cnt = 0
     f_ct = 0
-    newtime = time.time()
     # size = np.random.choice([100, 150, 200, 250, 300, 350])
     size = np.random.choice([100, 150, 200, 250, 300, 350, 400, 450, 500])
     k = np.random.randint(10, 30)
@@ -115,10 +115,16 @@ for id in range(2000):
     graph, adj, wts = random_graph(size=size, k=k, p=p, gtype=FLAGS.gtype, gseed=id+2000)
     adj_0 = adj.copy()
     nn = adj_0.shape[0]
+    newtime0 = time.time()
     mwds_c, gray_c, total_wt_c = baseline(adj, wts)
+    runtime0 = time.time() - newtime0
+    newtime1 = time.time()
     mwds_0, gray_0, total_wt_0 = heuristic_func(adj, wts)
+    runtime1 = time.time() - newtime1
 
+    newtime2 = time.time()
     state, zs_t = dqn_agent.foo_train(adj_0, wts, train=True)
+    runtime2 = time.time() - newtime2
     zs_np = zs_t.numpy()
     if dqn_agent.flags.diver_num == 2:
         gcn_wts = zs_np[:, 0].flatten() * wts.flatten() + zs_np[:, 1].flatten()
@@ -126,6 +132,7 @@ for id in range(2000):
         gcn_wts = np.multiply(zs_np.flatten(), wts.flatten())
     top_wts = np.clip(gcn_wts, a_min=0.0, a_max=None)
     mwds_i, gray_i, _ = heuristic_func(adj_0, top_wts)
+    runtime3 = time.time() - newtime2
     total_wt_i = np.sum(wts[list(mwds_i)])
     p_ratio = total_wt_i/total_wt_0
 
@@ -133,8 +140,6 @@ for id in range(2000):
     assert nx.is_dominating_set(graph, mwds_c)
     assert nx.is_dominating_set(graph, mwds_0)
 
-    runtime = time.time() - newtime
-    newtime = time.time()
     print("ID: {}".format(id),
           "gtype: {}, size: {}, k: {}, p: {:.3f}".format(FLAGS.gtype, size, k, p),
           "Model: Actor",
@@ -145,7 +150,7 @@ for id in range(2000):
           "ratio: {:.3f}".format(total_wt_i / total_wt_0),
           "gcn ar: {:.3f}".format(total_wt_i / total_wt_c),
           "grd ar: {:.3f}".format(total_wt_0 / total_wt_c),
-          "runtime: {:.2f}".format(runtime),
+          "runtime: {:.2f}, {:.2f}, {:.2f}, {:.2f}".format(runtime0, runtime1, runtime2, runtime3),
           )
     results = results.append({"type": FLAGS.gtype, "size": size, "k": k, "p": p,
                               "mwds_i": len(mwds_i),
@@ -155,7 +160,11 @@ for id in range(2000):
                               "vvv": total_wt_c,
                               "ar_gb": total_wt_i/total_wt_c,
                               "ar_db": total_wt_0/total_wt_c,
-                              "ratio": total_wt_i/total_wt_0},
+                              "ratio": total_wt_i/total_wt_0,
+                              "t0": runtime0,
+                              "t1": runtime1,
+                              "t2": runtime2,
+                              "t3": runtime3},
                               ignore_index=True)
 
     results.to_csv(csvname)

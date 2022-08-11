@@ -81,7 +81,7 @@ epislon_reset = [5, 10, 15, 20]
 epislon_val = 1.0
 
 best_ratio = 0.95
-results = pd.DataFrame([], columns=["data", "p", "step_lgs", "step_gcn"])
+results = pd.DataFrame([], columns=["data", "p", "step_lgs", "step_gcn","t0","t1","t2"])
 p_ratios = []
 postfix = 'lgs'
 # csvname = "./output/{}_{}_{}.csv".format(model_origin.split('/')[-1], test_datapath.split('/')[-1], postfix)
@@ -93,21 +93,24 @@ for id in range(len(test_mat_names)):
     adj_0 = mat_contents['adj']
     wts = mat_contents['weights'].transpose()
     # _, greedy_util = local_greedy_search(adj_0, wts)
+    newtime0 = time.time()
     _, greedy_util, step_gdy = local_greedy_search_stats(adj_0, wts)
+    runtime0 = time.time()-newtime0
     nn = adj_0.shape[0]
     bsf_q = []
     q_ct = 0
     res_ct = 0
     out_id = -1
 
-    start_time = time.time()
+    newtime1 = time.time()
     act_vals, _ = dqn_agent.utility(adj_0, wts, train=False)
+    runtime1 = time.time() - newtime1
     gcn_wts = np.multiply(act_vals.flatten(), wts.flatten())
     # mwis, _ = local_greedy_search(adj_0, gcn_wts)
     mwis, _, step_gcn = local_greedy_search_stats(adj_0, gcn_wts)
+    runtime2 = time.time() - newtime1
     ss_util = np.sum(wts[list(mwis)])
 
-    runtime = time.time() - start_time
 
     p_ratio = ss_util.flatten()/greedy_util.flatten()
     p_ratios.append(p_ratio[0])
@@ -117,7 +120,7 @@ for id in range(len(test_mat_names)):
           "Ratio: {:.6f}".format(p_ratio[0]),
           "Avg_Ratio: {:.6f}".format(np.mean(p_ratios)),
           # "Avg_IS_Size: {:.4f}".format(avg_is_size),
-          "runtime: {:.3f}".format(runtime))
+          "runtime: {:.3f}, {:.3f}, {:.3f}".format(runtime0, runtime1, runtime2))
 
     # results = results.append({"data": test_mat_names[id],
     #                           "p": p_ratio[0],
@@ -126,7 +129,10 @@ for id in range(len(test_mat_names)):
     results = results.append({"data": test_mat_names[id],
                               "p": p_ratio[0],
                               "step_lgs": step_gdy,
-                              "step_gcn": step_gcn
+                              "step_gcn": step_gcn,
+                              "t0": runtime0,
+                              "t1": runtime1,
+                              "t2": runtime2
                               },
                              ignore_index=True)
 

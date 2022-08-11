@@ -113,7 +113,7 @@ class Solver(object):
 
         # GCN
         state = self.makestate(adj, wts_nn)
-        act_vals = self.act(state, train)
+        act_vals, _ = self.act(state, train)
 
         gcn_wts = act_vals.numpy()
 

@@ -1,6 +1,6 @@
 # Graph-based Deterministic Policy Gradient for Repetitive Combinatorial Optimization Problems
 
-This repository is part of the paper with the given title, that has been submitted to NeurIPS 2022.
+This repository is part of the paper with the given title, that has been submitted to ICLR 2023.
 This README contains instructions for replicating the 5 numerical experiments demonstrated in the paper.
 The code is based on Python3 + Tensorflow 2.
 

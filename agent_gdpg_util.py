@@ -82,7 +82,7 @@ class GDPGAgent(Solver):
         # Build model
         model = Model(inputs=[x_in, a_in], outputs=gc_l)
         if self.flags.learning_decay == 1.0:
-            self.optimizer = Adam(lr=self.learning_rate)
+            self.optimizer = Adam(learning_rate=self.learning_rate)
         else:
             lr_schedule = schedules.ExponentialDecay(
                 initial_learning_rate=self.learning_rate,
@@ -117,7 +117,7 @@ class GDPGAgent(Solver):
         # Build model
         model = Model(inputs=[x_in, a_in], outputs=gc_l)
         if self.flags.learning_decay == 1.0:
-            self.opt_crt = Adam(lr=0.001)
+            self.opt_crt = Adam(learning_rate=0.001)
         else:
             lr_schedule = schedules.ExponentialDecay(
                 initial_learning_rate=0.001,

@@ -4,6 +4,10 @@ This repository is part of the paper with the given title, that has been submitt
 This README contains instructions for replicating the 5 numerical experiments demonstrated in the paper.
 The code is based on Python3 + Tensorflow 2.
 
+Minor updates on 1/24/2024: 
+- replaced `lr` with `learning_rate` in the code to avoid unstability in training caused by incorrect learning rate in later versions of Tensorflow 2.
+- added the training and validation datasets used in MWIS example.
+
 ## Abstract
 We propose an actor-critic framework for graph-based machine learning pipelines with non-differentiable blocks, and apply it to repetitive combinatorial optimization problems (COPs) under hard constraints.
 Repetitive COP refers to problems to be solved repeatedly on graphs of the same or slowly changing topology but rapidly changing node or edge weights.

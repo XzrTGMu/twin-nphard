@@ -31,7 +31,25 @@ flags.DEFINE_string('test_datapath', './data/ER_Graph_Uniform_NP20_test', 'test 
 flags.DEFINE_integer('ntrain', 1, 'Number of units in hidden layer 1.')
 flags.DEFINE_integer('nvalid', 100, 'Number of outputs.')
 from mwis_gcn_call_twin import DQNAgent
-dqn_agent = DQNAgent(FLAGS, 5000)
+
+# Get a list of available GPUs
+gpus = tf.config.experimental.list_physical_devices('GPU')
+if gpus:
+    try:
+        for gpu in gpus:
+            tf.config.experimental.set_memory_growth(gpu, True)
+    except RuntimeError as e:
+        print(e)
+# Set the number of GPUs to use
+num_gpus = len(gpus)
+# Set up a MirroredStrategy to use all available GPUs
+if num_gpus > 1:
+    strategy = tf.distribute.MirroredStrategy(devices=["/gpu:%d" % i for i in range(num_gpus)])
+else:
+    strategy = tf.distribute.get_strategy() # default strategy
+# Define and compile your model within the strategy scope
+with strategy.scope():
+    dqn_agent = DQNAgent(FLAGS, 5000)
 
 # test data path
 data_path = FLAGS.datapath
@@ -51,12 +69,12 @@ from directory import create_result_folder, find_model_folder
 model_origin = find_model_folder(FLAGS, 'dqn')
 critic_origin = find_model_folder(FLAGS, 'critic')
 
-# use gpu 0
-os.environ['CUDA_VISIBLE_DEVICES'] = str(0)
-
-# Initialize session
-config = tf.compat.v1.ConfigProto()
-config.gpu_options.allow_growth = True
+# # use gpu 0
+# os.environ['CUDA_VISIBLE_DEVICES'] = str(0)
+#
+# # Initialize session
+# config = tf.compat.v1.ConfigProto()
+# config.gpu_options.allow_growth = True
 
 try:
     dqn_agent.load_critic(critic_origin)

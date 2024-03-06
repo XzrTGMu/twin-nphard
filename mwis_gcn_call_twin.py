@@ -63,7 +63,7 @@ class DQNAgent(Solver):
                 act = "leaky_relu"
                 output_dim = self.flags.hidden1
             else:
-                act = "relu"
+                act = "leaky_relu"
                 output_dim = self.flags.diver_num
             do_l = Dropout(self.flags.dropout, dtype='float64')(gc_l)
             gc_l = ChebConv(
@@ -159,8 +159,11 @@ class DQNAgent(Solver):
         act_values = self.model([x_in, a_in])
         return act_values, np.argmax(act_values.numpy())
 
-    def act(self, state, train):
+    def act(self, state, train, explore=0.0):
         act_values, action = self.predict(state)
+        if explore > 0.001:
+            noise = tf.random.uniform(act_values.shape, -explore, explore, dtype=act_values.dtype)
+            act_values += noise
         return act_values, action  # returns action
 
     def predict_critic(self, z_out, state):
@@ -231,17 +234,16 @@ class DQNAgent(Solver):
         with tf.GradientTape() as g:
             g.watch(self.model.trainable_weights)
             state = self.makestate(adj, ones)
-            act_val, act = self.act(state, train)
+            act_val, act = self.act(state, train, explore=0.03)
             act_val_norm = act_val
             # act_val_norm = 0.5 + (act_val - tf.reduce_mean(act_val))
             sch_pred = self.predict_critic(act_val_norm, state)
-
-            if train:
-                regularization_loss = tf.reduce_sum(self.model.losses)
-                obj_fn = -tf.reduce_mean(sch_pred[:, 0])
-                obj_fn = obj_fn + regularization_loss
-                gradients = g.gradient(obj_fn, self.model.trainable_weights)
-                self.memorize(gradients, [], [], obj_fn.numpy(), 0)
+            regularization_loss = tf.reduce_sum(self.model.losses)
+            obj_fn = -tf.reduce_mean(sch_pred[:, 0])
+            obj_fn = obj_fn + regularization_loss
+        if train: # place gradient computing outside GradientTape
+            gradients = g.gradient(obj_fn, self.model.trainable_weights)
+            self.memorize(gradients, [], [], obj_fn.numpy(), 0)
         return state, act_val
 
     def predict_train(self, adj_0, zs_0, state, n_samples=1, z_std=0.15):
@@ -283,14 +285,7 @@ class DQNAgent(Solver):
             y_target = tf.convert_to_tensor(ind_vec, dtype=tf.float64)
             regularization_loss = tf.reduce_sum(self.critic.losses)
             loss_value = tf.sqrt(self.mse(y_target, sch_pred)) + regularization_loss
-            gradients = g.gradient(loss_value, self.critic.trainable_weights)
-            self.memorize_crt(gradients, loss_value.numpy(), reward)
+        gradients = g.gradient(loss_value, self.critic.trainable_weights)
+        self.memorize_crt(gradients, loss_value.numpy(), reward)
         return ind_vec, reward
 
-
-# use gpu 0
-os.environ['CUDA_VISIBLE_DEVICES'] = str(0)
-
-# Initialize session
-config = tf.compat.v1.ConfigProto()
-config.gpu_options.allow_growth = True

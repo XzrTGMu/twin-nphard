@@ -30,7 +30,25 @@ from heuristics import *
 flags.DEFINE_integer('opt', 1, '1: dgcn_lgs, 2: dgcn_cgs, 3: gcn_rollout')
 
 from mwis_gcn_call_twin import DQNAgent # Twin
-dqn_agent = DQNAgent(FLAGS, 5000)
+
+# Get a list of available GPUs
+gpus = tf.config.experimental.list_physical_devices('GPU')
+if gpus:
+    try:
+        for gpu in gpus:
+            tf.config.experimental.set_memory_growth(gpu, True)
+    except RuntimeError as e:
+        print(e)
+# Set the number of GPUs to use
+num_gpus = len(gpus)
+# Set up a MirroredStrategy to use all available GPUs
+if num_gpus > 1:
+    strategy = tf.distribute.MirroredStrategy(devices=["/gpu:%d" % i for i in range(num_gpus)])
+else:
+    strategy = tf.distribute.get_strategy() # default strategy
+# Define and compile your model within the strategy scope
+with strategy.scope():
+    dqn_agent = DQNAgent(FLAGS, 5000)
 
 # test data path
 test_datapath = FLAGS.datapath
@@ -62,17 +80,12 @@ def weighted_random_graph(N, p, dist, maxWts=1.0):
 
     return graph
 
-# use gpu 0
-os.environ['CUDA_VISIBLE_DEVICES'] = str(0)
-
-# Initialize session
-config = tf.compat.v1.ConfigProto()
-config.gpu_options.allow_growth = True
 
 try:
     dqn_agent.load(model_origin)
 except:
     print("Unable to load {}".format(model_origin))
+
 
 best_IS_vec = []
 loss_vec = []

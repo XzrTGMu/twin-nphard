@@ -53,7 +53,7 @@ else:
     strategy = tf.distribute.get_strategy() # default strategy
 # Define and compile your model within the strategy scope
 with strategy.scope():
-	dqn_agent = DPGAgent(FLAGS, 5000)
+    dqn_agent = DPGAgent(FLAGS, 5000)
 
 # test data path
 data_path = FLAGS.datapath
@@ -238,7 +238,9 @@ for epoch in range(FLAGS.epochs):
               "Track: {:.4f}".format(tr_factor),
               "runtime: {:.2f}".format(runtime),
               "z_std: {:.3f}".format(np.nanmean(z_stds)),
-              "z_avg: {:.3f}".format(np.nanmean(z_means)))
+              "z_avg: {:.3f}".format(np.nanmean(z_means)),
+              flush=True
+              )
         p_ratios = []
         z_means = []
         z_stds = []

@@ -228,7 +228,7 @@ class DPGAgent(Solver):
         with tf.GradientTape() as g:
             g.watch(self.model.trainable_weights)
             state = self.makestate(adj, ones)
-            act_val, act = self.act(state, train)
+            act_val, act = self.act(state, train, explore=0.002)
             act_val_norm = act_val
             # act_val_norm = 0.5 + (act_val - tf.reduce_mean(act_val))
             sch_pred = self.predict_critic(act_val_norm, state)

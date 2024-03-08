@@ -1,6 +1,6 @@
 # Graph-based Deterministic Policy Gradient for Repetitive Combinatorial Optimization Problems
 
-This repository is part of the paper with the given title, that has been submitted to ICLR 2023.
+This repository is part of the paper with the given title, that has been published in ICLR 2023 <https://openreview.net/forum?id=yHIIM9BgOo>.
 This README contains instructions for replicating the 5 numerical experiments demonstrated in the paper.
 The code is based on Python3 + Tensorflow 2.
 
@@ -8,9 +8,9 @@ Updates on 1/24/2024:
 - [1/24/2024] replaced `lr` with `learning_rate` in the code to avoid unstability in training caused by incorrect learning rate in later versions of Tensorflow 2.
 - [1/24/2024] **added the training and validation datasets used in MWIS example.**
 - [1/24/2024] the output activation of the actor network can be changed from `relu` to `leaky_relu` or `linear` in order to ease the training.
-- [3/6/2024] **add exploration based on uniform noise to stablize training convergence**
+- [3/6/2024] **add exploration based on uniform noise to stablize training for MWIS and MWDS**
 - [3/6/2024] on-demand memory allocation for servers with multiple GPUs
-- [3/6/2024] minor code optimization: move gradient computing outside `GradientTape` scope
+- [3/6/2024] minor code optimization: move gradient computing outside `GradientTape` scope and create bash scripts files from README.
 
 ## Abstract
 We propose an actor-critic framework for graph-based machine learning pipelines with non-differentiable blocks, and apply it to repetitive combinatorial optimization problems (COPs) under hard constraints.
